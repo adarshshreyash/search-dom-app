@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Content Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .search-form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .result-item:hover {
+            transform: translateX(4px);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .result-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .result-score {
+            color: #764ba2;
+            font-weight: 600;
+        }
+
+        .result-text {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #c33;
+        }
+
+        .info {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Website Content Search</h1>
+        
+        <div class="search-form">
+            <div class="form-group">
+                <label for="url">Website URL</label>
+                <input 
+                    type="text" 
+                    id="url" 
+                    placeholder="https://example.com"
+                    value="https://en.wikipedia.org/wiki/Web_scraping"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="query">Search Query</label>
+                <input 
+                    type="text" 
+                    id="query" 
+                    placeholder="Enter your search query"
+                    value="data extraction"
+                >
+            </div>
+
+            <button onclick="performSearch()">Search</button>
+        </div>
+
+        <div class="loading" id="loading">
+            Searching... Please wait
+        </div>
+
+        <div id="error-container"></div>
+        <div id="results-container"></div>
+    </div>
+
+    <script>
+        async function performSearch() {
+            const url = document.getElementById('url').value.trim();
+            const query = document.getElementById('query').value.trim();
+            
+            const loadingEl = document.getElementById('loading');
+            const errorContainer = document.getElementById('error-container');
+            const resultsContainer = document.getElementById('results-container');
+            
+            errorContainer.innerHTML = '';
+            resultsContainer.innerHTML = '';
+            
+            if (!url || !query) {
+                errorContainer.innerHTML = '<div class="error">Please enter both URL and search query</div>';
+                return;
+            }
+            
+            loadingEl.style.display = 'block';
+            
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url, query })
+                });
+                
+                const data = await response.json();
+                
+                loadingEl.style.display = 'none';
+                
+                if (!response.ok) {
+                    errorContainer.innerHTML = `<div class="error">${data.error || 'An error occurred'}</div>`;
+                    return;
+                }
+                
+                displayResults(data.results, data.total_chunks);
+                
+            } catch (error) {
+                loadingEl.style.display = 'none';
+                errorContainer.innerHTML = '<div class="error">Failed to perform search. Please try again.</div>';
+            }
+        }
+        
+        function displayResults(results, totalChunks) {
+            const container = document.getElementById('results-container');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="info">No matches found</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="info">Found ${results.length} matches out of ${totalChunks} chunks</div>
+                <div class="results">
+                    ${results.map((result, index) => `
+                        <div class="result-item">
+                            <div class="result-header">
+                                <span class="result-tag">&lt;${result.tag}&gt;</span>
+                                <span class="result-score">Score: ${(result.score * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="result-text">${escapeHtml(result.text)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Allow search on Enter key
+        document.getElementById('query').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
