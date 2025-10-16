@@ -1,10 +1,10 @@
-## Website Content Search - Flask Web Application
+# Website Content Search - Flask Web Application
 
-# Overview
+## Overview
 
 This Flask-based single-page application (SPA) allows users to input a website URL and a search query, then returns the top 10 matching segments ("chunks") of HTML content from that website based on keyword relevance.
 
-# Features
+## Features
 
 - Fetch and parse HTML content from any public URL.
 - Extract meaningful DOM chunks (paragraphs, headings, divs, etc.).
@@ -13,7 +13,7 @@ This Flask-based single-page application (SPA) allows users to input a website U
 
 ---
 
-# Prerequisites
+## Prerequisites
 
 - Python 3.10 or higher
 - Git (optional for cloning the repo)
@@ -21,35 +21,17 @@ This Flask-based single-page application (SPA) allows users to input a website U
 
 ---
 
-# Project Structure
-search-dom-app/
-├── app.py                 # Main Flask application
-├── templates/
-│   └── index.html         # Frontend HTML file (SPA UI)
-├── requirements.txt       # Python dependencies
-└── README.md              # Project instructions and info
+## Requirements
 
----
+The project depends on these Python packages:
 
-# Requirements
-Flask==3.0.0
-beautifulsoup4==4.12.2
-requests==2.31.0
-lxml==5.0.0
-scikit-learn==1.7.2
-sentence-transformers==2.2.2  # optional if embeddings added later
 
----
+- `Flask`: Web framework for building the backend server.
+- `beautifulsoup4` & `lxml`: HTML parsing and DOM chunk extraction.
+- `requests`: HTTP client to fetch webpage HTML.
+- `scikit-learn`: TF-IDF vectorization and cosine similarity for search.
+- `sentence-transformers`: Later use for generating semantic vector embeddings.
 
-# Setup Instructions(Installation and running)
 
-*Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-*Install dependencies
-pip install -r requirements.txt
-
-*Run the application
-python app.py
 
