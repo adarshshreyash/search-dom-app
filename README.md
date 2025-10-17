@@ -32,6 +32,17 @@ The project depends on these Python packages:
 - `scikit-learn`: TF-IDF vectorization and cosine similarity for search.
 - `sentence-transformers`: Later use for generating semantic vector embeddings.
 
+## Installation and running
+
+Create the environment variables
+- `ptyhon -m venv venv`
+- `venv/Scripts/activate`
+
+Install the dependencies from requirements.txt
+- `pip install -r requirements.txt`
+  
+Run the project
+- `python app.py`
 
 
 
